@@ -1,0 +1,14 @@
+<resources>
+
+    <string name="app_name">FitSport</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="Fragment1">İlk fragment</string>
+    <string name="FragmentTab1">Aktivite Ayarlama Tabı</string>
+    <string name="FragmentTab2">Harita Tabı</string>
+    <string name="drawer_open">Menu Aç</string>
+    <string name="drawer_close">Menu Kapa</string>
+    <string name="action_settings">Ayarlar</string>
+    
+
+</resources>
