@@ -23,6 +23,7 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
 			return fragmenttab1;
 		case 1:
 			HaritaFragmentTab fragmenttab2 = new HaritaFragmentTab();
+			
 			return fragmenttab2;
 		}
 		return null;
