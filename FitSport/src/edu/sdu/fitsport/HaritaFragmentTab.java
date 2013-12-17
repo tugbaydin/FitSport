@@ -13,12 +13,9 @@ import java.util.List;
 
 import org.json.JSONObject;
 
-import android.content.Context;
 import android.graphics.Color;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,8 +27,8 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -64,55 +61,46 @@ public class HaritaFragmentTab extends SherlockFragment implements LocationListe
 		markerPoints = new ArrayList<LatLng>();
 		if(googleMap!=null){
 			
-			// Enable MyLocation Button in the Map
+			// Kendi yerini bulma aktif
 			googleMap.setMyLocationEnabled(true);		
 			
-			// Setting onclick event listener for the map
+			// Harita üzerinde click eventý
 			googleMap.setOnMapClickListener(new OnMapClickListener() {
 				
 				@Override
 				public void onMapClick(LatLng point) {
 					
-					// Already two locations				
+					//Önceki noktalarý sil				
 					if(markerPoints.size()>1){
 						markerPoints.clear();
 						googleMap.clear();					
 					}
 					
-					// Adding new item to the ArrayList
+					// Týklanan nokta listede
 					markerPoints.add(point);				
-					
-					// Creating MarkerOptions
-					MarkerOptions options = new MarkerOptions();
-					
-					// Setting the position of the marker
+					MarkerOptions options = new MarkerOptions();					
+					// Nokta üzerine pozisyon alma
 					options.position(point);
-					
-					/** 
-					 * For the start location, the color of marker is GREEN and
-					 * for the end location, the color of marker is RED.
-					 */
+
 					if(markerPoints.size()==1){
 						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 					}else if(markerPoints.size()==2){
 						options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 					}
-								
-					
-					// Add new marker to the Google Map Android API V2
+
 					googleMap.addMarker(options);
 					
-					// Checks, whether start and end locations are captured
+					// Baþlangýç ve bitiþ noktalarýný alma
 					if(markerPoints.size() >= 2){					
 						LatLng origin = markerPoints.get(0);
 						LatLng dest = markerPoints.get(1);
 						
-						// Getting URL to the Google Directions API
+						//Google Directions APIden URL çekme
 						String url = getDirectionsUrl(origin, dest);				
 						
 						DownloadTask downloadTask = new DownloadTask();
 						
-						// Start downloading json data from Google Directions API
+						//Google Directions APIden indirmeye baþla
 						downloadTask.execute(url);
 					}
 					
@@ -138,30 +126,22 @@ public class HaritaFragmentTab extends SherlockFragment implements LocationListe
 	
 	private String getDirectionsUrl(LatLng origin,LatLng dest){
 		
-		// Origin of route
-		String str_origin = "origin="+origin.latitude+","+origin.longitude;
-		
-		// Destination of route
-		String str_dest = "destination="+dest.latitude+","+dest.longitude;		
-		
-					
-		// Sensor enabled
+		// Baþlangýç noktasý
+		String baslangicNokta = "origin="+origin.latitude+","+origin.longitude;		
+		// Bitiþ noktasý
+		String bitisNokta = "destination="+dest.latitude+","+dest.longitude;		
+
 		String sensor = "sensor=false";			
 					
-		// Building the parameters to the web service
-		String parameters = str_origin+"&"+str_dest+"&"+sensor;
-					
-		// Output format
+		// Web servis için parametreler
+		String parameters = baslangicNokta+"&"+bitisNokta+"&"+sensor;
 		String output = "json";
-		
-		// Building the url to the web service
 		String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters;
-		
 		
 		return url;
 	}
 	
-	/** A method to download json data from url */
+	/** JSON Veri Çekme */
     private String downloadUrl(String strUrl) throws IOException{
         String data = "";
         InputStream iStream = null;
@@ -169,13 +149,11 @@ public class HaritaFragmentTab extends SherlockFragment implements LocationListe
         try{
                 URL url = new URL(strUrl);
 
-                // Creating an http connection to communicate with url 
+                // HTTP Connection üzerinde Url
                 urlConnection = (HttpURLConnection) url.openConnection();
-
-                // Connecting to url 
                 urlConnection.connect();
 
-                // Reading data from url 
+                // URL Okuma
                 iStream = urlConnection.getInputStream();
 
                 BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
@@ -192,7 +170,7 @@ public class HaritaFragmentTab extends SherlockFragment implements LocationListe
                 br.close();
 
         }catch(Exception e){
-                Log.d("Exception while downloading url", e.toString());
+                Log.d("Veri çekerken problem oluþtu - ", e.toString());
         }finally{
                 iStream.close();
                 urlConnection.disconnect();
@@ -202,18 +180,16 @@ public class HaritaFragmentTab extends SherlockFragment implements LocationListe
 
 	
 	
-	// Fetches data from url passed
+	// URLden Data Çekme
 	private class DownloadTask extends AsyncTask<String, Void, String>{			
 				
-		// Downloading data in non-ui thread
+		// Non-ui thread ile veri indirme
 		@Override
 		protected String doInBackground(String... url) {
-				
-			// For storing data from web service
 			String data = "";
 					
 			try{
-				// Fetching the data from web service
+				// Web Servisten Veri Çekme
 				data = downloadUrl(url[0]);
 			}catch(Exception e){
 				Log.d("Background Task",e.toString());
@@ -221,24 +197,26 @@ public class HaritaFragmentTab extends SherlockFragment implements LocationListe
 			return data;		
 		}
 		
-		// Executes in UI thread, after the execution of
-		// doInBackground()
+		/*
+		 * UI Thread ile veri çekilmesi doInBackgrounddan sonra
+		 *
+		 */
 		@Override
 		protected void onPostExecute(String result) {			
 			super.onPostExecute(result);			
 			
 			ParserTask parserTask = new ParserTask();
 			
-			// Invokes the thread for parsing the JSON data
+			// Veri çekilmesinden sonra thread çaðýrma
 			parserTask.execute(result);
 				
 		}		
 	}
 	
-	/** A class to parse the Google Places in JSON format */
+	/** Google Places Verisini JSON ile Çekme */
     private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String,String>>> >{
     	
-    	// Parsing the data in non-ui thread    	
+    	// Non-Ui Threade Veri Geçme   	
 		@Override
 		protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
 			
@@ -249,7 +227,7 @@ public class HaritaFragmentTab extends SherlockFragment implements LocationListe
             	jObject = new JSONObject(jsonData[0]);
             	JSONParser parser = new JSONParser();
             	
-            	// Starts parsing data
+            	// JSON Verisi Parçalama
             	routes = parser.parse(jObject);    
             }catch(Exception e){
             	e.printStackTrace();
@@ -257,22 +235,21 @@ public class HaritaFragmentTab extends SherlockFragment implements LocationListe
             return routes;
 		}
 		
-		// Executes in UI thread, after the parsing process
+		// Parçalamadan sonra UI Thread Çalýþmasý
 		@Override
 		protected void onPostExecute(List<List<HashMap<String, String>>> result) {
 			ArrayList<LatLng> points = null;
 			PolylineOptions lineOptions = null;
 			MarkerOptions markerOptions = new MarkerOptions();
 			
-			// Traversing through all the routes
+			// Yolun Üzerinde Geçme
 			for(int i=0;i<result.size();i++){
 				points = new ArrayList<LatLng>();
 				lineOptions = new PolylineOptions();
 				
-				// Fetching i-th route
+				// Yolu Alma
 				List<HashMap<String, String>> path = result.get(i);
 				
-				// Fetching all the points in i-th route
 				for(int j=0;j<path.size();j++){
 					HashMap<String,String> point = path.get(j);					
 					
@@ -283,14 +260,14 @@ public class HaritaFragmentTab extends SherlockFragment implements LocationListe
 					points.add(position);						
 				}
 				
-				// Adding all the points in the route to LineOptions
+				// LineOptionsa Yolu Ekleme
 				lineOptions.addAll(points);
 				lineOptions.width(2);
 				lineOptions.color(Color.RED);	
 				
 			}
 			
-			// Drawing polyline in the Google Map for the i-th route
+			// GoogleMaps Üzerinde Ýþaretleme
 			googleMap.addPolyline(lineOptions);							
 		}			
     }   
